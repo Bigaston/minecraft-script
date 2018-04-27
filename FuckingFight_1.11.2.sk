@@ -1,0 +1,1193 @@
+﻿#--------------------[OPTIONS DE JEU]--------------------
+
+options:
+	logo: §6FuckingFight
+	logo2: §8[§6FuckingFight§8]§r
+	TempsAvantDégâts: 60 #En secondes
+	#Zone de TP (-x/+y/+z)
+	x: -1000
+	y: 250
+	z: 1000
+	#Taille de la bordure (z*2)
+	Border: 2000
+	#Gamerule DoWeatherCycle (y/n)
+	DoWeatherCycle: y
+	#Pommes qui peuvent spawn dans touts les feuillages (y/n)
+	Pommes: n
+	#Pourcentage de chance de les avoirs
+	PommesPrct: 5
+	#Pommes en or qui peuvent drop en cassant des feuilles (y/n)
+	GoldApple: y
+	#Pourcentage de les avoirs
+	GoldApplePrct: 1
+	#Tous les animaux droppent du cuir (y/n)
+	MobsLeather: y
+	#Pourcentage de chance de drop du cuir
+	MobsLeatherPrct: 15
+	#Taux de drop de magma cream augmenté (y/n)
+	MagmaCream: y
+	#Pourcentage de drop
+	MagmaCreamPrct: 50
+	#Eternalday (y/n)
+	EternalDay: y
+	#EternalDay à partir de quel épisode
+	EternalDayEp: 1
+	#Chronomètre
+	Minutes: 15
+	#Jour où le PVP est actif
+	PvP: 2
+	#Kick joueur à la mort (y/n)
+	Kick: n
+	#FriendlyFire (y/n)
+	FriendlyFire: y
+	#Pigmens qui droppent des pommes d'or (y/n)
+	Pigs1: y
+	#Pourcentage de drops
+	Pigs1Prct: 5
+	#Pigmens qui droppent des diamants (y/n)
+	Pigs2: y
+	#Pourcentage de drops
+	Pigs2Prct: 5
+	#Ghasts qui droppent de l'or (y/n)
+	Ghast: y
+	#Pourcentage de drops
+	GhastPrct: 5
+	#Potions de Regen (y/n)
+	Regen: n
+	#Potions de level 2 (y/n)
+	LvL2: y
+	#Autoriser la canne a pêche (y/n)
+	Canap: n
+	#1 diamant économisé pour les crafts (y/n)
+	DiamondC: y
+	#Pourcentage de chances
+	DiamondCPrct: 5
+	#1 or économisé pour les crafts (y/n)
+	GoldC: y
+	#Pourcentage de chances
+	GoldCPrct: 5
+	#Pomme en diamant (y/n)
+	DiamondApple: y
+	#Boussole (y/n)
+	Compass: y
+	#Spawn avec un bateau (y/n)
+	BoatSpawn: y
+	#Spawn avec une pelle en pierre (y/n)
+	StoneShovel: n
+	#Spawn avec une hache en pierre (y/n)
+	StoneAxe: y 
+	#Spawn avec une houe en pierre (y/n)
+	StoneHoe: n 
+	#Spawn avec une pioche en pierre (y/n)
+	StonePickaxe: y 
+	#Spawn avec une épée en pierre (y/n)
+	StoneSword: y
+	#Spawn avec de la nourriture (y/n)
+	GaveMeat: y
+	#Combien de steak	
+	GaveMeatNb: 32
+	#Double barre de vie (y/n)
+	LifeX2: y
+	#Message de kick si mort:
+	DeathMSG: §6GG !
+	
+#--------------------[CODE DU PLUGIN NE PAS TOUCHER]--------------------
+
+#Ce plug in a été codé pour permettre a toute personne de pouvoir créer
+#sa partie d'UHC entre amis. Si vous utilisez ce plug in dans une vidéo
+#Merci de mentionner dans la vidéo et en descriptif les codeurs
+#(Xenakiff, MrBigaston, lexmad13009) ainsi que leur chaîne youtube
+#respectives. Pour l'utilisation de ce plug in, modifiez seulement
+#la partie intituée "OPTIONS DE JEU", et veillez a ce que tous
+#les paramètres soient utilisable par le skript. Pour eviter tout
+#beugs au niveau des TP, évitez de toucher les ligne 7,8,9,11.
+#Nous vous remercions d'avoir téléchargé notre plug in
+#et espérons avoir de bons retours de votre part.
+#
+#BON GAME A TOUS !
+
+#--------------------[EVENTS BY SKRIPT NE PAS TOUCHER]--------------------
+
+	
+on skript load:
+	delete {uhc.start}
+	set {uhc.nbplayer} to 0
+	set {uhc.min} to {@Minutes}
+	set {uhc.sec} to 0
+	set {uhc.ep} to 1
+	execute console command "/gamerule sendCommandFeedback false"
+	execute console command "/gamerule commandBlockOutput false"
+	execute console command "/gamerule naturalRegeneration false"
+	execute console command "/gamerule doDaylightCycle false"
+	execute console command "/time set 6000"
+	execute console command "/gamerule doWeatherCycle true"
+	execute console command "/weather clear"
+	set {uhc.nodamage} to 1
+	set {uhc.nopvp} to 1
+	if "{@DiamondApple}" is "y":
+		register new shaped recipe for 322:1 using gold block, diamond block, gold block, diamond block, apple, diamond block, gold block, emerald block, gold block
+	if "{@Compass}" is "y":
+		register new shaped recipe for 345 using bone, iron ingot, string, iron ingot, diamond, iron ingot, magma cream, iron ingot, spider eye
+	
+on first join:
+	teleport player to {uhc.spawn}
+	set {uhc.kill.%player%} to 0
+	set the player's gamemode to adventure
+	send "{@logo2} §4/!\ §2Plug In lancé correctement ✔ §4/!\"
+	send "{@logo2} §2Bon jeu !"
+	execute console command "/gamerule commandBlockOutput false"
+	execute console command "/gamerule naturalRegeneration false"
+
+on join:
+	set join message to "§7[§2+1§7] %player%"
+	send "{@logo2} §5Le §6/rules §5s'impose pour lire les règles"
+	send "§4[ADMINS] §5Utilisez la commande §6/uhc help §5pour afficher les commandes disponibles"
+	if {uhc.spec.%player%} is set:
+		if "{@Kick}" is "y":
+			wait 5 seconds
+			kick the player due to "{@DeathMSG}"
+	if {uhc.start} is not set:
+		delete {uhc.spec.%player%}
+		set {uhc.kill.%player%} to 0
+	if "{@LifeX2}" is "y":
+		set rf max hp of player to 40
+		if {uhc.start} is not set:
+			wait 5 ticks
+			heal the player
+	if "{@LifeX2}" is "n":
+		set rf max hp of player to 20
+		if {uhc.start} is not set:
+			wait 5 ticks
+			heal the player
+
+on respawn:
+	if {uhc.spec.%player%} is set:
+		if "{@Kick}" is "y":
+			wait 5 seconds
+			kick the player due to "{@DeathMSG}"
+
+on quit:
+	set quit message to "§7[§4-1§7] %player%"
+	add -1 to {uhc.nbplayer}
+
+on damage:
+	if {uhc.nodamage} is set:
+		if victim is a player:
+			cancel event
+		else:
+			stop
+	if {uhc.team.%victim%} is {uhc.team.%attacker%}:
+		if "{@FriendlyFire}" is "n":
+			cancel event
+			message "{@logo}§c C'est ton mate !" to attacker
+	if {uhc.nopvp} is set:
+		if attacker is a player:
+			if victim is a player:
+				cancel event
+				message "{@logo2} §eLe PvP est §6désactivé §e!" to attacker
+	if {uhc.pause} is set:
+		cancel event
+		message "{@logo2} §eLa partie est en pause."
+
+On Hunger Meter Change:
+	if {uhc.start} is not set:
+		cancel event
+
+on break:
+	if {uhc.pause} is set:
+		cancel event
+		send "{@logo2} §eLa partie est en pause."
+
+on place:
+	if {uhc.pause} is set:
+		cancel event
+		send "{@logo2} §eLa partie est en pause."
+
+on chat:
+	if {uhc.spec.%player%} is set:
+		cancel event
+	if {uhc.team.%player%} is "bleuclair":
+		set message format to "§9<%player%> §r%message%"
+	if {uhc.team.%player%} is "cyan":
+		set message format to "§3<%player%> §r%message%"
+	if {uhc.team.%player%} is "bleu":
+		set message format to "§1<%player%> §r%message%"
+	if {uhc.team.%player%} is "magenta":
+		set message format to "§d<%player%> §r%message%"
+	if {uhc.team.%player%} is "violet":
+		set message format to "§5<%player%>  §r%message%"
+	if {uhc.team.%player%} is "rose":
+		set message format to "§c<%player%> §r%message%"
+	if {uhc.team.%player%} is "rouge":
+		set message format to "§4<%player%> §r%message%"
+	if {uhc.team.%player%} is "orange":
+		set message format to "§6<%player%> §r%message%"
+	if {uhc.team.%player%} is "jaune":
+		set message format to "§e<%player%> §r%message%"
+	if {uhc.team.%player%} is "vertclair":
+		set message format to "§a<%player%> §r%message%"
+	if {uhc.team.%player%} is "vert":
+		set message format to "§2<%player%> §r%message%"
+	if {uhc.team.%player%} is "brun":
+		set message format to "§6<%player%> §r%message%"
+	if {uhc.team.%player%} is "noir":
+		set message format to "§0<%player%> §r%message%"
+	if {uhc.team.%player%} is "gris":
+		set message format to "§8<%player%> §r%message%"
+	if {uhc.team.%player%} is "grisclair":
+		set message format to "§7<%player%> §r%message%"
+	if {uhc.team.%player%} is "blanc":
+		set message format to "§f<%player%> §r%message%"
+
+every 1 seconds:
+	if {uhc.team} is not set:
+		loop all players:
+			set {uhc.health.%loop-player%} to loop-player's health
+			set {uhc.health.%loop-player%} to {uhc.health.%loop-player%}*2
+			set loop-player tab name to "%name of loop-player% §6%{uhc.health.%loop-player%}%"
+	if {uhc.team.enable} is set:
+		loop all players:
+			set {uhc.health.%loop-player%} to loop-player's health
+			set {uhc.health.%loop-player%} to {uhc.health.%loop-player%}*2
+			if {uhc.team.%loop-player%} is "bleuclair":
+				set loop-player tab name to "§9%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "cyan":
+				set loop-player tab name to "§3%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "bleu":
+				set loop-player tab name to "§1%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "magenta":
+				set loop-player tab name to "§d%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "violet":
+				set loop-player tab name to "§5%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "rose":
+				set loop-player tab name to "§c%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "rouge":
+				set loop-player tab name to "§4%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "orange":
+				set loop-player tab name to "§6%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "jaune":
+				set loop-player tab name to "§e%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "vertclair":
+				set loop-player tab name to "§a%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "vert":
+				set loop-player tab name to "§2%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "brun":
+				set loop-player tab name to "§6%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "noir":
+				set loop-player tab name to "§0%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "gris":
+				set loop-player tab name to "§8%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "grisclair":
+				set loop-player tab name to "§7%loop-player% §6%{uhc.health.%loop-player%}%"
+			if {uhc.team.%loop-player%} is "blanc":
+				set loop-player tab name to "§f%loop-player% §6%{uhc.health.%loop-player%}%"
+
+
+every 1 seconds:
+	if {uhc.start} is set:
+		if {uhc.pause} is not set:
+			add -1 to {uhc.sec}
+	if {uhc.sec} is -1:
+		add -1 to {uhc.min}
+		set {uhc.sec} to 59
+		if {uhc.min} is 0:
+			broadcast "{@logo2} §eIl reste §61§e minutes avant la fin de l'épisode!"
+			play "ENTITY_WOLF_GROWL" to players at volume 1
+	if {uhc.min} is -1:
+		broadcast "{@logo2} §eFin de l'épisode §6%{uhc.ep}%"
+		play "ENTITY_WOLF_GROWL" to players at volume 1
+		add 1 to {uhc.ep}
+		set {uhc.min} to {@Minutes}
+		set {uhc.sec} to 0
+		if {uhc.ep} is {@PvP}:
+			broadcast "{@logo2} §cLe §4PvP§c est actifs, Bonne chance !"
+			play "ENTITY_WOLF_GROWL" to players at volume 1
+			delete {uhc.nopvp}
+		if "{@EternalDay}" is "y":		
+			if {uhc.ep} is {@EternalDayEp}:
+				execute console command "/gamerule doDaylightCycle false"
+				execute console command "/time set 6000"
+				broadcast "{@logo2} §eL'§6eternalDay§e est actif, la nuit n'existe plus."
+				
+				
+#--------------------[SCOREBOARD NE PAS TOUCHER]--------------------
+				
+	loop all players:
+		wipe loop-player's sidebar
+		set name of sidebar of loop-player to "{@logo}"
+		set score "§eEpisode§6 %{uhc.ep}%" in sidebar of loop-player to 9
+		if {uhc.pause} is set:
+			if {uhc.sec} is between 0 and 9:
+				set score "§6%{uhc.min}%:0%{uhc.sec}%§4 PAUSE" in sidebar of loop-player to 8
+			else:
+				set score "§6%{uhc.min}%:%{uhc.sec}%§4 PAUSE" in sidebar of loop-player to 8
+		else if {uhc.sec} is between 0 and 9:
+			set score "§6%{uhc.min}%:0%{uhc.sec}%" in sidebar of loop-player to 8
+		else:
+			set score "§6%{uhc.min}%:%{uhc.sec}%" in sidebar of loop-player to 8
+		set score "  " in sidebar of loop-player to 7
+		if {uhc.start} is not set:
+			set score "§6%number of all players%§e joueur(s)" in sidebar of loop-player to 6
+		if {uhc.start} is set:
+			set score "§6%{uhc.alive}%§e joueur(s)" in sidebar of loop-player to 6
+		if {uhc.start} is not set:
+			if {uhc.team.enable} is set:
+				set score "§6Equipe:" in sidebar of loop-player to 5
+				if {uhc.team.%loop-player%} is not set:
+					set score "§e(/team)" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "bleuclair":
+					set score "§9§lBleue claire" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "cyan":
+					set score "§3§lCyan" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "bleu":
+					set score "§1§lBleue" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "magenta":
+					set score "§d§lMagenta" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "violet":
+					set score "§5§lViolette" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "rose":
+					set score "§c§lRose" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "rouge":
+					set score "§4§lRouge" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "orange":
+					set score "§6§lOrange" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "jaune":
+					set score "§e§lJaune" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "vertclair":
+					set score "§a§lVerte claire" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "vert":
+					set score "§2§lVerte" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "brun":
+					set score "§6§lBrunne" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "noir":
+					set score "§0§lNoire" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "gris":
+					set score "§8§lGrise" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "grisclair":
+					set score "§7§lGrise claire" in sidebar of loop-player to 4
+				if {uhc.team.%loop-player%} is "blanc":
+					set score "§f§lBlanche" in sidebar of loop-player to 4
+
+			if {uhc.team.enable} is not set:
+				set score "§6Equipe §4✖" in sidebar of loop-player to 5
+		set score "   " in sidebar of loop-player to 3
+		if {uhc.nopvp} is set:
+			set score "§6PvP §4✖" in sidebar of loop-player to 2
+		else if {uhc.nopvp} is not set:
+			set score "§6PvP §2✔" in sidebar of loop-player to 2
+		if {uhc.start} is set:
+			set score "§eKills: §6%{uhc.kill.%loop-player%}%" in sidebar of loop-player to 1
+			
+#--------------------[EVENTS BY PLAYER NE PAS TOUCHER]--------------------
+
+on break of leaves:
+	if "{@Pommes}" is "y":
+		chance of {@PommesPrct}%:
+			drop 1 apple
+		if "{@GoldApple}" is "y":
+			chance of {@GoldApplePrct}%:
+				drop 1 golden apple
+
+on break of oak leaves:
+	if "{@Pommes}" is "y":
+		stop
+	else:
+		chance of {@PommesPrct}%:
+			drop 1 apple
+		if "{@GoldApple}" is "y":
+			chance of {@GoldApplePrct}%:
+				drop 1 golden apple
+				
+on death of ghast:
+	if "{@Ghast}" is "y":
+		chance of {@GhastPrct}%:
+			drop golden ingot at location of victim
+	
+on death of zombie pigman:
+	if "{@Pigs1}" is "y":
+		chance of {@Pigs1Prct}%:
+			drop golden apple at location of victim
+			
+on death of zombie villager:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop golden apple at location of victim
+			
+on death of llama:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop golden apple at location of victim
+			
+on death of pig:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop leather at location of victim
+			
+on death of sheep:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop leather at location of victim
+			
+on death of husk:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop leather at location of victim
+			
+on death of zombie:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop leather at location of victim
+			
+on death of chicken:
+	if "{@MobsLeather}" is "y":
+		chance of {@MobsLeatherPrct}%:
+			drop leather at location of victim
+			
+on death of magma cube:
+	if "{@MagmaCream}" is "y":
+		chance of {@MagmaCreamPrct}%:
+			drop magma cream at location of victim
+			
+on portal enter:
+	wait 5 tick
+	execute console command "/execute %player% ~ ~ ~ /gamerule commandBlockOutput false"
+	execute console command "/execute %player% ~ ~ ~ /gamerule naturalRegeneration false"
+			
+on rightclick with compass:
+    if "{@Compass}" is "n":
+        send "{@logo2}§c Cette action n'est pas disponible."
+
+on rightclick with compass:
+    if "{@Compass}" is "y":
+        set {_distance} to 1999999
+        loop all players:
+            loop-player is not the player
+            loop-player's gamemode is survival
+            set {_t} to distance between loop-player and player
+            {_t} is less than {_distance}
+            set {_distance} to {_t}
+            set {_p} to loop-player
+            set {_Coord} to location of {_p}
+        if {_p} is not set:
+            send "§cAucun joueur détécté."
+        else: 
+            set the player's compass target to location of {_Coord}
+            send "§9Le joueur §4%{_p}% §9est à §4%{_distance}% §9blocks de distance"
+            damage player by 0.5 hearts
+		
+on item spawn of 370:
+	if "{@Regen}" is "n":
+		cancel event
+		
+on item spawn of 348:
+	if "{@LvL2}" is "n":
+		cancel event
+	
+on craft:
+	if "{@DiamondC}" is "y":
+		#if event-item is diamond pickaxe or diamond axe or diamond shovel or diamond sword or diamond hoe or enchanting table or diamond chestplate or diamond helmet or diamond leggings or diamond boots or diamond block or diamond:
+		if event-item is diamond pickaxe or diamond shovel or diamond sword or diamond hoe or diamond axe or diamond chestplate or diamond helmet or diamond leggings or diamond boots or diamond block or diamond or enchantment table:
+			chance of {@DiamondCPrct}%:
+				drop diamond at player
+				
+on craft:
+	if "{@GoldC}" is "y":
+		#if event-item is golden pickaxe or golden axe or golden shovel or golden sword or golden hoe or golden chestplate or golden helmet or golden leggings or golden boots or gold block or gold ingot::
+		if event-item is golden pickaxe or golden shovel or golden sword or golden hoe or golden axe or golden chestplate or golden helmet or golden leggings or golden boots or gold block or gold ingot::
+			chance of {@GoldCPrct}%:
+				drop gold ingot at player
+				
+#--------------------[PARTIE MORT NE PAS TOUCHER]--------------------
+
+on death:
+	if victim is a player:
+		add -1 to {uhc.alive}
+		play "ENTITY_WITHER_SPAWN" to players at volume 1
+		launch creeper firework colored red at victim timed 1
+		if {uhc.alive} is -1:
+			set {uhc.alive} to 0
+		set the player's gamemode to spectator
+		add 1 to {uhc.kill.%attacker%}
+		force respawn victim
+		send "{@logo2} §eVous êtes a présent en §7spéctateur§e." to victim
+		send "{@logo2} §c/!\ §eNe divulguez aucune informations !" to victim
+		set {uhc.spec.%player%} to 1
+		if {uhc.team.enable} is set:
+			if {uhc.team.%player%} is "bleuclair":
+				add -1 to {uhc.team.bleuclair}
+			if {uhc.team.%player%} is "cyan":
+				add -1 to {uhc.team.cyan}
+			if {uhc.team.%player%} is "bleu":
+				add -1 to {uhc.team.bleu}
+			if {uhc.team.%player%} is "magenta":
+				add -1 to {uhc.team.magenta}
+			if {uhc.team.%player%} is "violet":
+				add -1 to {uhc.team.violet}
+			if {uhc.team.%player%} is "rose":
+				add -1 to {uhc.team.rose}
+			if {uhc.team.%player%} is "rouge":
+				add -1 to {uhc.team.rouge}
+			if {uhc.team.%player%} is "orange":
+				add -1 to {uhc.team.orange}
+			if {uhc.team.%player%} is "jaune":
+				add -1 to {uhc.team.jaune}
+			if {uhc.team.%player%} is "vertclair":
+				add -1 to {uhc.team.vertclair}
+			if {uhc.team.%player%} is "vert":
+				add -1 to {uhc.team.vert}
+			if {uhc.team.%player%} is "brun}":
+				add -1 to {uhc.team.brun}
+			if {uhc.team.%player%} is "noir":
+				add -1 to {uhc.team.noir}
+			if {uhc.team.%player%} is "gris":
+				add -1 to {uhc.team.gris}
+			if {uhc.team.%player%} is "grisclair":
+				add -1 to {uhc.team.grisclair}
+			if {uhc.team.%player%} is "blanc":
+				add -1 to {uhc.team.blanc}
+			delete {uhc.team.%player%}
+			
+on death:
+    victim is a player
+    drop golden apple at location of victim
+    drop the victim's skull at location of victim
+	
+#--------------------[COMMANDES NE PAS TOUCHER]--------------------
+
+command /craft [<text>]:
+	trigger:
+		if arg-1 is "GApple":
+			wait 2 tick
+			open chest with 3 rows named "§eCraft de la §6Notch Apple" to player
+			wait 1 tick
+			if "{@DiamondApple}" is "y":
+				format slot 3 of player with gold block named "§eBlock d'or" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 4 of player with diamond block named "§bBlock de diamant" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 5 of player with gold block named "§eBlock d'or" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 12 of player with diamond block named "§bBlock de diamant" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 13 of player with apple named "§cPomme" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 14 of player with diamond block named "§bBlock de diamant" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 21 of player with gold block named "§eBlock d'or" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 22 of player with emerald block named "§2Block d'émeraude" with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 23 of player with gold block named "§eBlock d'or"  with lore "§9GApple" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+			if "{@DiamondApple}" is "n":
+				send "§4 La pomme de notch n'est pas activée."
+				send "§4 Demandez a l'admin de verifier les parametres de jeu."
+		if arg-1 is "Boussole":
+			wait 2 tick
+			open chest with 3 rows named "§eCraft de la §6Boussole" to player
+			wait 1 tick
+			if "{@Compass}" is "y":
+				format slot 3 of player with bone named "§7Os" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 4 of player with iron ingot named "§8Lingot de fer" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 5 of player with string named "§7Fil" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 12 of player with iron ingot named "§8Lingot de fer" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 13 of player with diamond named "§bDiamant" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 14 of player with iron ingot named "§8Lingot de fer" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 21 of player with magma cream named "§6Crème de §cMagma" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 22 of player with iron ingot named "§8Lingot de fer" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+				format slot 23 of player with spider eye named "§5Oeil d'araignée" with lore "§9Boussole" to close then run "{@logo2}§4 Tu ne peut pas prendre cette item!"
+			if "{@Compass}" is "n":
+				send "§4 La boussole n'est pas activée."
+				send "§4 Demandez a l'admin de verifier les parametres de jeu."
+		if arg-1 is "help":
+			send "§7=----------= {@logo2} §7=-------------="
+			send "§7> §5/craft GApple §9Ouvre le craft de la §o§n§3Pomme de Notch"
+			send "§7> §5/craft Boussole §9Ouvre le craft de la §o§n§3Boussole"
+			send "§7=----------= {@logo2} §7=-------------="
+		if arg-1 is not set:
+			send "§4✖ ERREUR:§5 Utilisez §9/craft help §5pour ouvrir l'aide"
+			
+command /compass [<text>]:
+    trigger:
+        if arg-1 is "help":
+            send "§7=----------= {@logo2} §7=-------------="
+            send "§7>§c Un clic droit avec la boussole en main vous donne la distance qui vous sépare du joueur le plus proche."
+            send "§7>§4 ATTENTION:§c Utiliser la boussole vous inflige 1/2 §4❤§c de dégat pour éviter le spam"
+            send "§7>§c Pour afficher le craft de la boussole, utilisez la commande §5/craft Boussole"
+            send "§7=----------= {@logo2} §7=-------------="
+        if arg-1 is not set:
+            send "§4✖ ERREUR:§5 Utilisez §9/compass help §5pour ouvrir le menu"
+			
+				
+command /rules:
+	trigger:
+		send "§7=----------= {@logo2} §7=-------------="
+		send "§7>§oPlug in : MrBigaston"
+		send "§7>§oModifications : Xenakiff"
+		send "§7>§oAide aux modifications : lexmad13009"
+		send "§7>§9Bienvenue dans {@logo}"
+		send "§7>§9Le PvP sera activé à l'épisode §o§n§3{@PvP}"
+		send "§7>§9Les dégats serons actif §o§n§3{@TempsAvantDégâts} §r§9secondes apres le spawn"
+		send "§7>§9Il est §4STRICTEMENT INTERDIT §9de piéger les portails du nether"
+		send "§7>§9Episodes de §o§n§3{@Minutes} §r§9minutes"
+		send "§7>§9Un fois spectateur, ne divulgez §4AUCUNE §9information aux autres joueurs"
+		send "§7>§9Nous jouons sur une map de taille §o§n§3{@Border}x{@Border}"
+		if {uhc.team.enable} is set:
+			send "§7>§9Interdiction de s'allier a d'autres équipes"
+		if {uhc.team.enable} is not set:
+			send "§7>§9Interdiction de s'allier a d'autres joueurs"
+		if "{@EternalDay}" is "y":
+			send "§7>§9La partie sera en eternal day a partir de l'épisode §o§n§3{@EternalDayEp}"
+		if "{@DoWeatherCycle}" is "y":
+			send "§7>§9La météo n'affectera pas la partie"
+		if "{@LifeX2}" is "y":
+			send "§7>§9La partie se jouera avec 40§c❤§9 au lieu de 20"
+		if "{@Canap}" is "n":
+			send "§7>§4INTERDICTION §9d'utiliser une canne a pêche en PvP"
+		if "{@MobsLeather}" is "y":
+			send "§7>§9Les mobs suivants §7§o(poules, moutons, husk, lamas, cochons, zombies et zombies villageois) §r§9on §o§n§3{@MobsLeatherPrct} §r§9pourcent de chance de drop du cuir"
+		if "{@DiamondApple}" is "y":
+			send "§7>§9Le crafts de la pomme de Notch est modifié"
+			send "§7>§9Pour afficher le craft, utilisez la commande §o§n§3/craft help"
+		if "{@Compass}" is "y":
+			send "§7>§9Le crafts de la boussole est modifié"
+			send "§7>§9Pour afficher le craft, utilisez la commande §o§n§3/craft help"
+		if "{@GaveMeat}" is "y":
+			send "§7>§9Vous spawnerez avec §o§n§3{@GaveMeatNb}§r§9 steak dans votre inventaire"
+		if "{@BoatSpawn}" is "y":
+			send "§7>§9Vous spawnerez avec un bateau dans votre inventaire §7§o(en cas de spawn dans l'océan)"
+		if "{@StoneAxe}" is "y":
+			send "§7>§9Vous spawnerez avec une hache en pierre dans votre inventaire"
+		if "{@StoneHoe}" is "y":
+			send "§7>§9Vous spawnerez avec une houe en pierre dans votre inventaire"
+		if "{@StonePickaxe}" is "y":
+			send "§7>§9Vous spawnerez avec une pioche en pierre dans votre inventaire"
+		if "{@StoneShovel}" is "y":
+			send "§7>§9Vous spawnerez avec une pelle en pierre dans votre inventaire"
+		if "{@StoneSword}" is "y":
+			send "§7>§9Vous spawnerez avec une épée en pierre dans votre inventaire"
+		if "{@DiamondC}" is "y":
+			send "§7>§9Il y a §o§n§3{@DiamondCPrct}§r§9 pourcent de chance d'économiser un diamant sur vos crafts"
+		if "{@GoldC}" is "y":
+			send "§7>§9Il y a §o§n§3{@GoldCPrct}§r§9 pourcent de chance d'économiser un or sur vos crafts"
+		if "{@Pommes}" is "y":
+			send "§7>§9Les pommes peuvent apparaitre dans tous les types d'arbres"
+		if "{@GoldApple}" is "y":
+			send "§7>§9Il y a §o§n§3{@GoldApplePrct}§r§9 pourcent de chance de drop une pomme d'or en cassant les feuilles"
+		if "{@Pigs2}" is "y":
+			send "§7>§9Il y a §o§n§3{@Pigs2Prct}§r§9 pourcent de chance de drop un diamant sur un pigmen"
+		if "{@Pigs1}" is "y":
+			send "§7>§9Il y a §o§n§3{@Pigs1Prct}§r§9 pourcent de chance de drop une pomme d'or sur un pigmen"
+		if "{@Ghast}" is "y":
+			send "§7>§9Il y a §o§n§3{@GhastPrct}§r§9 pourcent de chance de drop un lingot d'or sur un ghast"
+		if "{@MagmaCream}" is "y":
+			send "§7>§9Le taux de drop des magma cream passe a §o§n§3{@MagmaCreamPrct}§r§9 pourcent de chance de drop"
+		if "{@Regen}" is "n":
+			send "§7>§9Potions de regeneration supprimées"
+		if "{@LvL2}" is "y":
+			send "§7>§9Potions de LvL 2 supprimées"
+		if "{@Compass}" is "y":
+			send "§7>§9Pour les détails sur la boussole, utilisez la commande §o§n§3/compass help"
+		if "{@Kick}" is "y":
+			send "§7>§9Vous serez automatiquement kick a votre mort"
+		send "§7=----------= {@logo2} §7=-------------="
+
+command /team [<text>] [<player>]:
+	trigger:
+		if {uhc.start} is set:
+			send "{@logo2} §eLa partie à déjà commencée."
+			stop
+		if {uhc.team.enable} is not set:
+			send "{@logo2} §eLe jeu en équipe n'est pas activé."
+			stop
+		else:
+			if arg-1 is not set:
+				wait 2 tick
+				open chest with 4 rows named "§eChoisissez votre §6équipe§e!" to player
+				wait 1 tick 
+				format slot 0 of player with light blue wool named "§9§lBleue claire" with lore "§9Click pour rejoindre cette équipe" to close then run "team bleuclair %player%"
+				format slot 1 of player with cyan wool named "§3§lCyan" with lore "§3Click pour rejoindre cette équipe" to close then run "team cyan %player%"
+				format slot 2 of player with blue wool named "§1§lBleue" with lore "§1Click pour rejoindre cette équipe" to close then run "team bleu %player%"
+				format slot 3 of player with magenta wool named "§d§lMagenta" with lore "§dClick pour rejoindre cette équipe" to close then run "team magenta %player%"
+				format slot 4 of player with purple wool named "§5§lViolette" with lore "§5Click pour rejoindre cette équipe" to close then run "team violet %player%"
+				format slot 5 of player with pink wool named "§c§lRose" with lore "§cClick pour rejoindre cette équipe" to close then run "team rose %player%"
+				format slot 6 of player with red wool named "§4§lRouge" with lore "§4Click pour rejoindre cette équipe" to close then run "team rouge %player%"
+				format slot 7 of player with orange wool named "§6§lOrange" with lore "§6Click pour rejoindre cette équipe" to close then run "team orange %player%"
+				format slot 8 of player with yellow wool named "§e§lJaune" with lore "§eClick pour rejoindre cette équipe" to close then run "team jaune %player%"
+				format slot 9 of player with light green wool named "§a§lVerte claire" with lore "§aClick pour rejoindre cette équipe" to close then run "team vertclair %player%"
+				format slot 10 of player with green wool named "§2§lVerte" with lore "§2Click pour rejoindre cette équipe" to close then run "team vert %player%"
+				format slot 11 of player with brown wool named "§6§lBrune" with lore "§6Click pour rejoindre cette équipe||§7§o(Oui, ce n'est pas la bonne couleur)" to close then run "team brun %player%"
+				format slot 12 of player with black wool named "§0§lNoire" with lore "§0Click pour rejoindre cette équipe" to close then run "team noir %player%"
+				format slot 13 of player with gray wool named "§8§lGrise" with lore "§8Click pour rejoindre cette équipe" to close then run "team gris %player%"
+				format slot 14 of player with light gray wool named "§7§lGrise claire" with lore "§7Click pour rejoindre cette équipe" to close then run "team grisclair %player%"
+				format slot 15 of player with white wool named "§f§lBlanche" with lore "§fClick pour rejoindre cette équipe" to close then run "team blanc %player%"
+				format slot 27 of player with magma cream named "§4§lQuitter l'équipe" with lore "§4Click pour quitter l'équipe" to close then run "team reset %player%"
+				format slot 35 of player with barrier named "§4§lFermer" with lore "§4Click pour fermer l'interface" to close
+			if arg-1 is "bleuclair":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §9§lbleue claire"
+				set {uhc.team.%player-arg%} to "bleuclair"	
+			if arg-1 is "cyan":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §3§lcyan"
+				set {uhc.team.%player-arg%} to "cyan"	
+			if arg-1 is "bleu":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §1§lbleu"
+				set {uhc.team.%player-arg%} to "bleu"	
+			if arg-1 is "magenta":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §d§lmagenta"
+				set {uhc.team.%player-arg%} to "magenta"
+			if arg-1 is "violet":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §5§lviolette"
+				set {uhc.team.%player-arg%} to "violet"
+			if arg-1 is "rose":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §c§lrose"
+				set {uhc.team.%player-arg%} to "rose"
+			if arg-1 is "rouge":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §4§lrouge"
+				set {uhc.team.%player-arg%} to "rouge"
+			if arg-1 is "orange":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §6§lorange"
+				set {uhc.team.%player-arg%} to "orange"
+			if arg-1 is "jaune":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §e§ljaune"
+				set {uhc.team.%player-arg%} to "jaune"
+			if arg-1 is "vertclair":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §a§lverte claire"
+				set {uhc.team.%player-arg%} to "vertclair"
+			if arg-1 is "vert":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §2§lverte"
+				set {uhc.team.%player-arg%} to "vert"
+			if arg-1 is "brun":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §6§lbrune"
+				set {uhc.team.%player-arg%} to "brun"
+			if arg-1 is "noir":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §0§lnoire"
+				set {uhc.team.%player-arg%} to "noir"
+			if arg-1 is "gris":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §8§lgrise"
+				set {uhc.team.%player-arg%} to "gris"
+			if arg-1 is "grisclair":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §7§lgrise claire"
+				set {uhc.team.%player-arg%} to "grisclair"
+			if arg-1 is "blanc":
+				broadcast "{@logo2} §6%player-arg%§e à rejoind l'équipe §f§lblanche"
+				set {uhc.team.%player-arg%} to "blanc"
+			if arg-1 is "random":
+				set {uhc.team.%player-arg%} to "random"
+			if arg-1 is "reset":
+				if arg-2 is set:
+					broadcast "{@logo2} §6%arg-player%§e a quitté son équipe."
+					delete {uhc.team.%arg-player%}
+				if arg-2 is not set:
+					broadcast "{@logo2} §6%player%§e a quitté son équipe."
+					delete {uhc.team.%player%}
+
+every 1 seconds:
+	loop all players:
+		if {uhc.team.%loop-player%} is "random":
+			chance of 6.25%:
+				execute console command "/team bleuclair %loop-player%"
+				stop
+			chance of 12.5%:
+				execute console command "/team cyan %loop-player%"
+				stop
+			chance of 18.75%:
+				execute console command "/team bleu %loop-player%"
+				stop
+			chance of 25%:
+				execute console command "/team magenta %loop-player%"
+				stop
+			chance of 31.25%:
+				execute console command "/team violet %loop-player%"
+				stop
+			chance of 37.5%:
+				execute console command "/team rose %loop-player%"
+				stop
+			chance of 43.75%:
+				execute console command "/team rouge %loop-player%"
+				stop
+			chance of 50%:
+				execute console command "/team orange %loop-player%"
+				stop
+			chance of 56.25%:
+				execute console command "/team jaune %loop-player%"
+				stop
+			chance of 62.5%:
+				execute console command "/team vertclair %loop-player%"
+				stop
+			chance of 68.75%:
+				execute console command "/team vert %loop-player%"
+				stop
+			chance of 75%:
+				execute console command "/team brun %loop-player%"
+				stop
+			chance of 81.25%:
+				execute console command "/team noir %loop-player%"
+				stop
+			chance of 87.5%:
+				execute console command "/team gris %loop-player%"
+				stop
+			chance of 93.75%:
+				execute console command "/team grisclair %loop-player%"
+				stop
+			else:
+				execute console command "/team blanc %loop-player%"
+
+command /invsee [<player>]:
+	trigger:
+		open the arg-1's inventory for the player
+		
+command /ping [<player>]:
+	aliases: /ms
+	trigger:
+		if arg 1 is not set:
+			set {_ping} to player's ping
+			send "§5 PONG ! §7Votre ping est de: §c%{_ping}% §7MS" to player
+		else if arg 1 is set:
+			set {_ping} to arg player's ping
+			send "§5 PONG ! §7Le ping de §b%arg-1% §7est de: §c%{_ping}% §7MS" to player
+
+command /uhc [<text>] [<text>] [<number>]:
+	aliases: /fufi
+	description: {@logo2} §eLa commande principale du plugin
+	permission: op
+	permission message: {@logo2} §cVous n'êtes pas opérateur!
+	trigger:
+		if arg-1 is "setspawn":
+			set {uhc.spawn} to location
+			broadcast "{@logo2} §eLes coordonées du spawn ont été définis en §6%{uhc.spawn}%"
+			make the command sender execute "/setworldspawn ~ ~ ~"
+		if arg-1 is "spawn":
+			if arg-2 is not set:
+				teleport player to {uhc.spawn}
+			if arg-2 is "me":
+				teleport player to {uhc.spawn}
+			if arg-2 is "all":
+				teleport all players to {uhc.spawn}
+		if arg-1 is "help":
+			if arg-2 is not set:
+				send "§7=----------= {@logo2} §7=-------------="
+				send "§eBienvenue dans l'aide! §6(1/2)"
+				send "§7> §6/uhc setspawn§e permet de définir le spawn du"
+				send "§emonde et du départ aux coordonées où vous êtes."
+				send "§7> §6/uhc spawn (all/me)§e permet de vous téléporter"
+				send "§eou de téléporter tous le monde au spawn définis précédament."
+				send "§7> §6/uhc setup§e permet de générer la cage en verre"
+				send "§eet de préparer la partie."
+				send "§7> §6/uhc team oui/non§e permet d'activer ou non le"
+				send "§ejeu en équipe. (/uhc help 2 pour la suite)"
+				send "§7=----------= {@logo2} §7=-------------="
+			if arg-2 is "1":
+				send "§7=----------= {@logo2} §7=-------------="
+				send "§eBienvenue dans l'aide! §6(1/2)"
+				send "§7> §6/uhc setspawn§e permet de définir le spawn du"
+				send "§emonde et du départ aux coordonées où vous êtes."
+				send "§7> §6/uhc spawn (all/me)§e permet de vous téléporter"
+				send "§eou de téléporter tous le monde au spawn définis précédament."
+				send "§7> §6/uhc setup§e permet de générer la cage en verre"
+				send "§eet de préparer la partie."
+				send "§7> §6/uhc team §e permet d'activer ou non le"
+				send "§ejeu en équipe. (/uhc help 2 pour la suite)"
+				send "§7=----------= {@logo2} §7=-------------="
+			if arg-2 is "2":
+				send "§7=----------= {@logo2} §7=-------------="
+				send "§eBienvenue dans l'aide! §6(2/2)"
+				send "§7> §6/uhc start§e permet de démarere la partie."
+				send "§7> §6/uhc goep - <numero ep>§e permet d'aller "
+				send "§eou de retourner à un épisode."
+				send "§7> §6/uhc pause§e permet d'activer ou de désactiver"
+				send "§ela pause."
+				send "§7> §6/uhc reload§e remet le plug in a 0."
+				send "§7> §d/craft help§5§l Affiche l'aide pour les crafts"
+				send "§7=----------= {@logo2} §7=-------------="
+		if arg-1 is "reload":
+			send "{@logo2} §4/!\ Demarrage de la reload /!\" to all players
+			execute console command "/effect @a minecraft:instant_health 1 50"
+			execute console command "/fill -11 118 -11 11 126 11 air"
+			execute console command "gamemode 2 @a"
+			execute console command "/tp @a 0 140 0"
+			execute console command "/uhc setspawn"
+			set {uhc.kill.%player%} to 0
+			delete {uhc.start}
+			set {uhc.nbplayer} to 0
+			set {uhc.min} to {@Minutes}
+			set {uhc.sec} to 0
+			set {uhc.ep} to 1
+			execute console command "/gamerule sendCommandFeedback false"
+			execute console command "/gamerule commandBlockOutput false"
+			execute console command "/gamerule naturalRegeneration false"
+			execute console command "/gamerule doDaylightCycle false"
+			execute console command "/time set 6000"
+			execute console command "/scoreboard objectives add Health health"
+			execute console command "/scoreboard objectives setdisplay list Health"
+			set {uhc.nodamage} to 1
+			set {uhc.nopvp} to 1
+			delete {uhc.team.enable}
+			send "{@logo2} §4/!\ §2Reload terminé ✔ §4/!\" to all players
+			send "{@logo2} §2Bon jeu !" to all players
+		if arg-1 is "start":
+			if {uhc.start} is set:
+				send "{@logo2} §4 ✖ERREUR✖ La partie a déja été lancée"
+				stop
+			if {uhc.start} is not set:
+				set {_count} to 10
+			if {uhc.team.enable} is set:
+				loop all players:
+					if {uhc.team.%loop-player%} is not set:
+						broadcast "{@logo2} §6%loop-player%§e n'a pas choisis son équipe!"
+						stop
+			loop 10 times:
+				broadcast "{@logo2} §eLa partie commence dans §6%{_count}%§e secondes"
+				play "BLOCK_NOTE_PLING" to players at volume 1
+				add -1 to {_count}
+				wait 1 seconds
+			execute console command "/worldborder center 0 0"
+			execute console command "/worldborder set {@Border}"
+			execute console command "clear @a"
+			execute console command "/effect @a minecraft:saturation 60 25 true"
+			if "{@GaveMeat}" is "y":
+				execute console command "/give @a minecraft:cooked_beef {@GaveMeatNb}"
+			if "{@BoatSpawn}" is "y":
+				execute console command "/give @a minecraft:boat"
+			if "{@StoneAxe}" is "y":
+				execute console command "/give @a minecraft:stone_axe"
+			if "{@StoneHoe}" is "y":
+				execute console command "/give @a minecraft:stone_hoe"
+			if "{@StonePickaxe}" is "y":
+				execute console command "/give @a minecraft:stone_pickaxe"
+			if "{@StoneShovel}" is "y":
+				execute console command "/give @a minecraft:stone_shovel"
+			if "{@StoneSword}" is "y":
+				execute console command "/give @a minecraft:stone_sword"
+			if {uhc.team.enable} is not set:
+				loop all players:
+					set loop-player's gamemode to survival
+					set {_x} to a random integer between {@x} and {@z}
+					set {_z} to a random integer between {@x} and {@z}
+					set {_loc} to the location at {_x}, {@y}, {_z} of the world world
+					teleport loop-player to {_loc}
+			if {uhc.team.enable} is set:
+				loop all players:
+					if {uhc.team.%loop-player%} is "bleuclair":
+						add 1 to {uhc.team.bleuclair}
+					if {uhc.team.%loop-player%} is "cyan":
+						add 1 to {uhc.team.cyan}
+					if {uhc.team.%loop-player%} is "bleu":
+						add 1 to {uhc.team.bleu}
+					if {uhc.team.%loop-player%} is "magenta":
+						add 1 to {uhc.team.magenta}
+					if {uhc.team.%loop-player%} is "violet":
+						add 1 to {uhc.team.violet}
+					if {uhc.team.%loop-player%} is "rose":
+						add 1 to {uhc.team.rose}
+					if {uhc.team.%loop-player%} is "rouge":
+						add 1 to {uhc.team.rouge}
+					if {uhc.team.%loop-player%} is "orange":
+						add 1 to {uhc.team.orange}
+					if {uhc.team.%loop-player%} is "jaune":
+						add 1 to {uhc.team.jaune}
+					if {uhc.team.%loop-player%} is "vert":
+						add 1 to {uhc.team.vert}
+					if {uhc.team.%loop-player%} is "vertclair":
+						add 1 to {uhc.team.vertclair}
+					if {uhc.team.%loop-player%} is "brun":
+						add 1 to {uhc.team.brun}
+					if {uhc.team.%loop-player%} is "noir":
+						add 1 to {uhc.team.noir}
+					if {uhc.team.%loop-player%} is "gris":
+						add 1 to {uhc.team.gris}
+					if {uhc.team.%loop-player%} is "grisclair":
+						add 1 to {uhc.team.grisclair}
+					if {uhc.team.%loop-player%} is "blanc":
+						add 1 to {uhc.team.blanc}
+				if {uhc.team.bleuclair} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.cyan} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.bleu} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.magenta} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.violet} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.rose} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.rouge} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.orange} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.jaune} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.vertclair} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.vert} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.brun} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.noir} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.gris} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.grisclair} is set:
+					add 1 to {uhc.nbteam}
+				if {uhc.team.blanc} is set:
+					add 1 to {uhc.nbteam}
+				set {xBleuClair} to a random integer between {@x} and {@z} 
+				set {zBleuClair} to a random integer between {@x} and {@z}
+				set {coBleuClair} to the location at {xBleuClair}, {@y}, {zBleuClair} of the world world
+				set {xCyan} to a random integer between {@x} and {@z}
+				set {zCyan} to a random integer between {@x} and {@z}
+				set {coCyan} to the location at {xCyan}, {@y}, {zCyan} of the world world
+				set {xBleu} to a random integer between {@x} and {@z} 
+				set {zBleu} to a random integer between {@x} and {@z}
+				set {coBleu} to the location at {xBleu}, {@y}, {zBleu} of the world world
+				set {xMagenta} to a random integer between {@x} and {@z} 
+				set {zMagenta} to a random integer between {@x} and {@z}
+				set {coMagenta} to the location at {xMagenta}, {@y}, {zMagenta} of the world world
+				set {xViolet} to a random integer between {@x} and {@z} 
+				set {zViolet} to a random integer between {@x} and {@z}
+				set {coViolet} to the location at {xViolet}, {@y}, {zViolet} of the world world
+				set {xRose} to a random integer between {@x} and {@z} 
+				set {zRose} to a random integer between {@x} and {@z}
+				set {coRose} to the location at {xRose}, {@y}, {zRose} of the world world
+				set {xRouge} to a random integer between {@x} and {@z} 
+				set {zRouge} to a random integer between {@x} and {@z}
+				set {coRouge} to the location at {xRouge}, {@y}, {zRouge} of the world world
+				set {xOrange} to a random integer between {@x} and {@z} 
+				set {zOrange} to a random integer between {@x} and {@z}
+				set {coOrange} to the location at {xOrange}, {@y}, {zOrange} of the world world
+				set {xJaune} to a random integer between {@x} and {@z} 
+				set {zJaune} to a random integer between {@x} and {@z}
+				set {coJaune} to the location at {xJaune}, {@y}, {zJaune} of the world world
+				set {xVertClair} to a random integer between {@x} and {@z} 
+				set {zVertClair} to a random integer between {@x} and {@z}
+				set {coVertClair} to the location at {xVertClair}, {@y}, {zVertClair} of the world world
+				set {xVert} to a random integer between {@x} and {@z} 
+				set {zVert} to a random integer between {@x} and {@z}
+				set {coVert} to the location at {xVert}, {@y}, {zVert} of the world world
+				set {xBrun} to a random integer between {@x} and {@z} 
+				set {zBrun} to a random integer between {@x} and {@z}
+				set {coBrun} to the location at {xBrun}, {@y}, {zBrun} of the world world
+				set {xNoir} to a random integer between {@x} and {@z} 
+				set {zNoir} to a random integer between {@x} and {@z}
+				set {coNoir} to the location at {xNoir}, {@y}, {zNoir} of the world world
+				set {xGris} to a random integer between {@x} and {@z} 
+				set {zGris} to a random integer between {@x} and {@z}
+				set {coGris} to the location at {xGris}, {@y}, {zGris} of the world world
+				set {xGrisClair} to a random integer between {@x} and {@z} 
+				set {zGrisClair} to a random integer between {@x} and {@z}
+				set {coGrisClair} to the location at {xGrisClair}, {@y}, {zGrisClair} of the world world
+				set {xBlanc} to a random integer between {@x} and {@z} 
+				set {zBlanc} to a random integer between {@x} and {@z}
+				set {coBlanc} to the location at {xBlanc}, {@y}, {zBlanc} of the world world
+				loop all players:
+					set loop-player's gamemode to survival
+					if {uhc.team.%loop-player%} is "bleuclair":
+						teleport loop-player to {coBleuClair}
+					if {uhc.team.%loop-player%} is "cyan":
+						teleport loop-player to {coCyan}
+					if {uhc.team.%loop-player%} is "bleu":
+						teleport loop-player to {coBleu}
+					if {uhc.team.%loop-player%} is "magenta":
+						teleport loop-player to {coMagenta}
+					if {uhc.team.%loop-player%} is "violet":
+						teleport loop-player to {coViolet}
+					if {uhc.team.%loop-player%} is "rose":
+						teleport loop-player to {coRose}
+					if {uhc.team.%loop-player%} is "rouge":
+						teleport loop-player to {coRouge}
+					if {uhc.team.%loop-player%} is "orange":
+						teleport loop-player to {coOrange}
+					if {uhc.team.%loop-player%} is "jaune":
+						teleport loop-player to {coJaune}
+					if {uhc.team.%loop-player%} is "vertclair":
+						teleport loop-player to {coVertClair}
+					if {uhc.team.%loop-player%} is "vert":
+						teleport loop-player to {coVert}
+					if {uhc.team.%loop-player%} is "brun":
+						teleport loop-player to {coBrun}
+					if {uhc.team.%loop-player%} is "noir":
+						teleport loop-player to {coNoir}
+					if {uhc.team.%loop-player%} is "gris":
+						teleport loop-player to {coGris}
+					if {uhc.team.%loop-player%} is "grisclair":
+						teleport loop-player to {coGrisClair}
+					if {uhc.team.%loop-player%} is "blanc":
+						teleport loop-player to {coBlanc}
+			broadcast "{@logo2} §eLa partie commence, le PvP sera actif au §6{@PvP}§eème jour."
+			broadcast "{@logo2} §eVous avez §6{@TempsAvantDégâts}§e secondes sans dégâts"
+			set {uhc.start} to 1
+			set {uhc.alive} to number of all players
+			if "{@EternalDay}" is "n":
+				execute console command "/gamerule doDaylightCycle true"
+				execute console command "/time set 0"
+				broadcast "{@logo2} §eLa partie n'est pas en §6eternalDay§e, le jour défilera normalement."
+			if "{@EternalDay}" is "y":
+				execute console command "/gamerule doDaylightCycle true"
+				execute console command "/time set 0"
+				broadcast "{@logo2} §eLa partie se déroulera en §6eternalDay"
+			if "{@DoWeatherCycle}" is "y":
+				execute console command "/gamerule doWeatherCycle false"
+				execute console command "/weather clear"
+			if "{@DoWeatherCycle}" is "n":
+				execute console command "/gamerule doWeatherCycle true"
+				execute console command "/weather rain"
+			set {_chronos} to {@TempsAvantDégâts}
+			loop {@TempsAvantDégâts} times:
+				execute console command "/effect @a minecraft:resistance 60 10"
+				wait 20 tick
+				add -1 to {_chronos}
+				loop all players:
+			broadcast "{@logo2} §eDégâts actifs."		
+			execute console command "/effect @a clear"
+			delete {uhc.nodamage}
+		if arg-1 is "setup":
+			loop 5 times:
+				execute console command "tp @p 0 120 0"
+				wait 1 seconds
+			execute console command "gamemode 1 %player%"
+			execute console command "/fill -11 118 -11 11 126 11 minecraft:barrier"
+			execute console command "/fill -10 119 -10 10 125 10 minecraft:quartz_block"
+			execute console command "/fill -9 120 -9 9 125 9 minecraft:air"
+			execute console command "/setblock 0 119 0 minecraft:glowstone"
+			execute console command "tp %player% 0 120 0"
+			make player execute "/uhc setspawn"
+			execute console command "tp %player% 0 120 0"
+			execute console command "gamemode 2 %player%"
+		#à retirer après test
+		if arg-1 is "pvp":
+			delete {uhc.nopvp}
+		if arg-1 is "team":
+			if arg-2 is "oui":
+				set {uhc.team.enable} to 1
+				broadcast "{@logo2} §eLe jeu en équipe est §2activé§e."
+			if arg-2 is "non":
+				delete {uhc.team.enable}
+				broadcast "{@logo2} §eLe jeu en équipe est §4désactivé§e."
+				loop all players:
+					delete {uhc.team.%loop-player%}
+			if arg-2 is not set:
+				if {uhc.team.enable} is set:
+					delete {uhc.team.enable}
+					broadcast "{@logo2} §eLe jeu en équipe est §4désactivé§e."
+					loop all players:
+						delete {uhc.team.%loop-player%}
+					stop
+				if {uhc.team.enable} is not set:
+					set {uhc.team.enable} to 1
+					broadcast "{@logo2} §eLe jeu en équipe est §2activé§e."
+					stop
+		if arg-1 is "goep":
+			set {uhc.ep} to arg-3
+			if arg-3 is less than {@PvP}:
+				broadcast "{@logo2} §eVous retournez à l'épisode §6%arg-3%§e, le PvP est désactivé."
+				set {uhc.nopvp} to 1
+			if arg-3 is more than {@PvP}-1:
+				broadcast "{@logo2} §eVous allez à l'épisode §6%arg-3%."
+				broadcast "{@logo2} §cLe §4PvP§c est actif. Que le meilleur gagne !"
+				play "ENTITY_WOLF_GROWL" to players at volume 1
+				delete {uhc.nopvp}
+		if arg-1 is "pause":
+			if {uhc.start} is not set:
+				send "{@logo2} §cLa partie n'a pas encore démarée."
+			if {uhc.start} is set:
+				if {uhc.pause} is not set:
+					set {uhc.pause} to 1
+					broadcast "{@logo2} §6%player%§e viens d'activer la pause."
+					stop
+				if {uhc.pause} is set:
+					delete {uhc.pause}
+					broadcast "{@logo2} §6%player%§e viens de désactiver la pause."
+					stop
+		if arg-1 is not set:
+			send "§4✖ ERREUR:§c Utilisez§a /<uhc|fufi> help§c pour ouvrir l'aide"
